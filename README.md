@@ -25,6 +25,14 @@
 
 > 🔁 Krok 9 krmí krok 1. Učíme se z každého videa — retence a komentáře říkají, jaké hooky a témata fungují.
 
+### ⭐ Zlaté pravidlo review smyčky
+
+**Na stole je vždy JEN JEDNA animace.** Agent představí jednu krátkou animaci (~5 s) a počká. Šéf pak říká:
+- **„zlepši X"** → agent upraví, převede, ukáže znovu (dokud není ✓)
+- **„další"** → animace schválena, archivuje se a agent staví další segment
+
+Žádné hromady variant dopředu. Iterujeme na jednom kusu, dokud není prémium.
+
 ---
 
 ## 📐 Specifikace výstupu
