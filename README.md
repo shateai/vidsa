@@ -158,19 +158,50 @@ ffmpeg -framerate 30 -i frames/%04d.png -i voice.mp3 \
 
 ---
 
-## 🗂️ Plánovaná struktura repa
+## 🏭 Výrobní pipeline: HyperFrames
+
+Videa skládáme z **předpřipravených segmentů** — každý segment je samostatná [HyperFrames](https://github.com/heygen-com/hyperframes) kompozice (HTML + GSAP), která se renderuje do MP4 deterministicky, snímek po snímku. Stejný vstup = identický výstup.
+
+### Proč tenhle model
+
+- 🎨 **Vždy stejný styl** — segmenty sdílí paletu, fonty a motion jazyk, takže výsledek vypadá konzistentně
+- 🧩 **Kombinovatelnost** — segmenty na sebe navazují čistými cuty (whip-out → cut), takže je můžeme řadit jako lego
+- 🤖 **Agent-friendly** — kompozice je HTML; agent umí segment vytvořit, zvalidovat i vyrenderovat sám
+- 🔁 **Opakovatelnost** — `npm run check` (lint + runtime + layout + motion + kontrast) před každým renderem
+
+### Struktura repa
 
 ```
 vidsa/
-├── README.md          ← tento playbook (zdroj pravdy)
-├── templates/         ← šablony scénářů a popisků
-├── videos/            ← 1 složka na video: RRRR-MM-DD-nazev/
-│   └── (scenar.md, voice.mp3, assets/, output.mp4)
-├── pipeline/          ← automatizační kód (render, TTS, titulky)
-└── docs/              ← detailní návody k jednotlivým krokům
+├── README.md                        ← tento playbook (zdroj pravdy)
+└── pipeline/
+    ├── package.json                 ← HyperFrames tooling (Node 22+, FFmpeg)
+    └── goat-start-v1/               ← SEGMENT #1: Hook start (5,5 s) ✅
+        ├── index.html               ← kompozice (HTML + GSAP timeline)
+        ├── assets/
+        │   ├── fonts/               ← Anton + Archivo (plná čeština)
+        │   ├── sfx/                 ← zvuková knihovna (syntetizovaná)
+        │   └── gsap.min.js
+        ├── preview/goat-start-v1.mp4← vyrenderovaný náhled
+        └── README.md                ← dokumentace segmentu (beat mapa, pravidla)
 ```
 
-> Zatím je tu jen README — složky přibývají podle toho, co zrovna budujeme.
+### Knihovna segmentů
+
+| Segment | Délka | Účel | Stav |
+|---|---|---|---|
+| `goat-start-v1` | 5,5 s | Hook: dopad → MESSI slam → GOAT? pečeť → taktika → payoff → whip-out | ✅ hotovo |
+| `stat-compare` | — | Srovnání dvou hráčů side-by-side (statistiky) | 🔜 navrženo |
+| `proof-reveal` | — | Rozkrytí důkazu č. N (velké číslo + fakt) | 🔜 navrženo |
+| `quote-card` | — | Citát / výrok s kinetickou typografií | 🔜 navrženo |
+| `rank-reveal` | — | Odhalení pořadí (countdown 5→1) | 🔜 navrženo |
+| `outro-follow` | — | CTA konec: follow + náhled dalšího dílu | 🔜 navrženo |
+
+### Prostředí (poznámky pro agenty)
+
+- Node 22+ a FFmpeg jsou potřeba pro render; `npx hyperframes render` stáhne headless Chrome sám
+- V sandboxu: renderovat s `TMPDIR` ve workspace a `--frames-cache-dir=off` (malý `/tmp`)
+- Detailní pravidla psaní kompozic: `pipeline/goat-start-v1/README.md` → „Pravidla pro nové segmenty"
 
 ---
 
@@ -178,11 +209,11 @@ vidsa/
 
 | Fáze | Co | Stav |
 |---|---|---|
-| **0** | Playbook + proces (toto repo) | ✅ **teď** |
-| **1** | Šablony scénářů, první videa „na půl automat" | ⏳ další |
-| **2** | Render pipeline: scénář → TTS → vizuály → titulky → MP4 jedním příkazem | 🔜 |
+| **0** | Playbook + proces (toto repo) | ✅ hotovo |
+| **1** | HyperFrames pipeline + knihovna segmentů, první videa „na půl automat" | 🔄 **probíhá** — 1/6 segmentů hotovo |
+| **2** | Celé video jedním příkazem: scénář → segmenty → TTS → MP4 | 🔜 |
 | **3** | Auto-titulky (whisper), knihovna b-rollu, batch rendering | 🔜 |
-| **4** | Plná automatizace: nápady → videos v limitu, scheduler, analýza výkonu | 🔮 |
+| **4** | Plná automatizace: nápady → videa v limitu, scheduler, analýza výkonu | 🔮 |
 
 ---
 
