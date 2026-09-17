@@ -1,0 +1,506 @@
+<!doctype html>
+<html lang="cs">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1080, height=1920" />
+    <script src="assets/gsap.min.js"></script>
+    <style>
+      @font-face {
+        font-family: "Anton";
+        src: url("assets/fonts/Anton-Regular.ttf") format("truetype");
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Archivo";
+        src: url("assets/fonts/Archivo-Variable.ttf") format("truetype");
+        font-weight: 100 900;
+        font-display: block;
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body {
+        width: 1080px; height: 1920px; overflow: hidden;
+        background: #060a08;
+        font-family: "Archivo", sans-serif;
+      }
+      #root {
+        position: relative;
+        width: 1080px; height: 1920px;
+        background: #060a08;
+        overflow: hidden;
+      }
+
+      /* ============ LAYER: BG ============ */
+      #bg {
+        position: absolute; inset: 0;
+        background:
+          radial-gradient(ellipse 140% 90% at 50% 42%, #0d2417 0%, #071009 52%, #040705 100%);
+      }
+      #bgGrid {
+        position: absolute; inset: 0; opacity: 0.5;
+        background-image: radial-gradient(rgba(198,255,74,0.055) 1.5px, transparent 1.5px);
+        background-size: 46px 46px;
+      }
+      #bgPitch {
+        position: absolute; inset: 0;
+      }
+      #vignette {
+        position: absolute; inset: 0;
+        background: radial-gradient(ellipse at 50% 45%, transparent 48%, rgba(0,0,0,0.62) 100%);
+      }
+      .speed {
+        position: absolute; left: 50%; top: 47%;
+        width: 3200px; height: 3200px;
+        margin: -1600px 0 0 -1600px;
+        border-radius: 50%;
+        background: repeating-conic-gradient(
+          from 0deg,
+          rgba(198,255,74,0.16) 0deg 0.9deg,
+          transparent 0.9deg 6.5deg
+        );
+        -webkit-mask-image: radial-gradient(circle, transparent 18%, black 42%, transparent 78%);
+        mask-image: radial-gradient(circle, transparent 18%, black 42%, transparent 78%);
+        opacity: 0;
+      }
+      #speed2 {
+        background: repeating-conic-gradient(
+          from 3deg,
+          rgba(255,255,255,0.10) 0deg 0.5deg,
+          transparent 0.5deg 5deg
+        );
+      }
+
+      /* ============ LAYER: STAGE ============ */
+      #stage {
+        position: absolute; inset: 0;
+      }
+
+      /* badge */
+      #badge {
+        position: absolute; left: 50%; top: 262px;
+        transform: translateX(-50%);
+        display: flex; align-items: center; gap: 22px;
+        opacity: 0;
+      }
+      #badge .rule { width: 64px; height: 2px; background: #c6ff4a; opacity: 0.75; }
+      #badgeClip { overflow: hidden; white-space: nowrap; }
+      #badgeText {
+        font-weight: 750; font-size: 33px; letter-spacing: 7px;
+        color: #eaffd2; text-transform: uppercase;
+      }
+      #caret {
+        display: inline-block; width: 4px; height: 30px;
+        background: #c6ff4a; margin-left: 8px; vertical-align: -3px;
+      }
+
+      /* glow behind hero */
+      #heroGlow {
+        position: absolute; left: 50%; top: 870px;
+        width: 980px; height: 720px;
+        margin: -360px 0 0 -490px;
+        background: radial-gradient(ellipse at center, rgba(198,255,74,0.16) 0%, rgba(198,255,74,0.05) 45%, transparent 70%);
+        opacity: 0;
+      }
+
+      /* hero group (MESSI + stamp + crown) */
+      #heroGroup { position: absolute; inset: 0; }
+      #messi {
+        position: absolute; left: 50%; top: 866px;
+        transform: translate(-50%, -50%);
+        font-family: "Anton", sans-serif;
+        font-size: 322px;
+        letter-spacing: 0.015em;
+        color: #f8fff2;
+        white-space: nowrap;
+        line-height: 1;
+        display: flex;
+      }
+      #messi .lt { display: inline-block; opacity: 0; }
+      #impactPoint {
+        position: absolute; left: 540px; top: 890px;
+      }
+      #ball {
+        position: absolute; left: 540px; top: 890px;
+        width: 68px; height: 68px; margin: -34px 0 0 -34px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 38% 32%, #ffffff 0%, #e8ff9e 34%, #c6ff4a 68%, #7fb32a 100%);
+        box-shadow: 0 0 46px 12px rgba(198,255,74,0.55), 0 0 120px 40px rgba(198,255,74,0.22);
+        opacity: 0;
+      }
+      .ring {
+        position: absolute; left: 540px; top: 890px;
+        width: 260px; height: 260px; margin: -130px 0 0 -130px;
+        border-radius: 50%;
+        opacity: 0;
+      }
+      #ring1 { border: 4px solid rgba(198,255,74,0.95); }
+      #ring2 { border: 2px solid rgba(255,255,255,0.8); }
+      .spark {
+        position: absolute; left: 540px; top: 890px;
+        width: 14px; height: 14px; margin: -7px 0 0 -7px;
+        border-radius: 50%;
+        opacity: 0;
+      }
+
+      /* GOAT stamp */
+      #stampWrap {
+        position: absolute; left: 728px; top: 1150px;
+        transform: translate(-50%, -50%) rotate(-5deg);
+      }
+      #stamp {
+        position: relative;
+        border: 7px solid #ffc93c;
+        padding: 8px 40px 14px;
+        background: rgba(20, 14, 2, 0.35);
+        opacity: 0;
+      }
+      #stamp::after {
+        content: "";
+        position: absolute; inset: 7px;
+        border: 2px solid rgba(255, 201, 60, 0.45);
+      }
+      #stampText {
+        font-family: "Anton", sans-serif;
+        font-size: 118px;
+        color: #ffc93c;
+        letter-spacing: 0.04em;
+        line-height: 1;
+      }
+      #crown {
+        position: absolute; left: 728px; top: 1010px;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        filter: drop-shadow(0 6px 18px rgba(255,201,60,0.45));
+      }
+
+      /* tactics */
+      #tactics { position: absolute; inset: 0; opacity: 1; }
+      #passSvg {
+        position: absolute; left: 0; top: 1330px;
+        width: 1080px; height: 220px;
+        overflow: visible;
+      }
+      #passPath {
+        fill: none;
+        stroke: #c6ff4a;
+        stroke-width: 7;
+        stroke-linecap: round;
+        stroke-dasharray: 18 15;
+        filter: drop-shadow(0 0 10px rgba(198,255,74,0.7));
+      }
+      #pathDot {
+        position: absolute; left: 0; top: 0;
+        width: 30px; height: 30px; margin: -15px 0 0 -15px;
+        border-radius: 50%;
+        background: radial-gradient(circle at 35% 30%, #ffffff 0%, #e8ff9e 45%, #c6ff4a 100%);
+        box-shadow: 0 0 24px 8px rgba(198,255,74,0.6);
+        opacity: 0;
+      }
+      .chip {
+        position: absolute; left: 50%;
+        transform: translateX(-50%);
+        display: flex; align-items: baseline; gap: 14px;
+        background: rgba(7, 13, 9, 0.82);
+        border: 2.5px solid rgba(198,255,74,0.85);
+        border-radius: 14px;
+        padding: 16px 34px;
+        white-space: nowrap;
+        opacity: 0;
+        box-shadow: 0 0 30px rgba(198,255,74,0.12), 0 10px 30px rgba(0,0,0,0.5);
+      }
+      .chip b {
+        font-weight: 850;
+        font-size: 52px;
+        color: #ffc93c;
+        font-family: "Anton", sans-serif;
+        letter-spacing: 0.02em;
+      }
+      .chip span {
+        font-weight: 760;
+        font-size: 38px;
+        letter-spacing: 3.5px;
+        color: #f2ffdf;
+        text-transform: uppercase;
+      }
+      #chip1 { top: 1290px; }
+      #chip2 { top: 1378px; }
+      #chip3 { top: 1466px; }
+
+      /* payoff */
+      #payBig {
+        position: absolute; left: 50%; top: 856px;
+        transform: translate(-50%, -50%);
+        font-family: "Anton", sans-serif;
+        font-size: 158px;
+        color: #f8fff2;
+        white-space: nowrap;
+        letter-spacing: 0.02em;
+        opacity: 0;
+        line-height: 1;
+      }
+      #payBig em { font-style: normal; color: #c6ff4a; }
+      #paySub {
+        position: absolute; left: 50%; top: 1006px;
+        transform: translateX(-50%);
+        font-weight: 800;
+        font-size: 58px;
+        letter-spacing: 14px;
+        color: #c6ff4a;
+        text-transform: uppercase;
+        white-space: nowrap;
+        opacity: 0;
+      }
+      #payRule {
+        position: absolute; left: 50%; top: 1096px;
+        transform: translateX(-50%);
+        width: 0px; height: 4px; background: #ffc93c;
+        opacity: 0;
+      }
+
+      /* ============ LAYER: FLASH ============ */
+      #flash {
+        position: absolute; inset: 0;
+        background: #ffffff;
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div
+      id="root"
+      data-composition-id="goat-start-v1"
+      data-start="0"
+      data-duration="5.5"
+      data-width="1080"
+      data-height="1920"
+    >
+      <!-- BG -->
+      <div id="bg" class="clip" data-start="0" data-duration="5.5" data-track-index="0">
+        <div id="bgGrid"></div>
+        <svg id="bgPitch" viewBox="0 0 1080 1920">
+          <circle cx="540" cy="880" r="330" fill="none" stroke="rgba(255,255,255,0.05)" stroke-width="2.5"/>
+          <line x1="0" y1="880" x2="1080" y2="880" stroke="rgba(255,255,255,0.045)" stroke-width="2.5"/>
+          <circle cx="540" cy="880" r="10" fill="rgba(255,255,255,0.06)"/>
+        </svg>
+        <div id="speed1" class="speed"></div>
+        <div id="speed2" class="speed"></div>
+        <div id="vignette"></div>
+      </div>
+
+      <!-- STAGE -->
+      <div id="stage" class="clip" data-start="0" data-duration="5.5" data-track-index="1">
+        <div id="badge">
+          <div class="rule"></div>
+          <div id="badgeClip"><span id="badgeText">GOAT CHECK · DÍL 01<i id="caret"></i></span></div>
+          <div class="rule"></div>
+        </div>
+
+        <div id="heroGroup">
+          <div id="heroGlow"></div>
+          <h1 id="messi"><span class="lt">M</span><span class="lt">E</span><span class="lt">S</span><span class="lt">S</span><span class="lt">I</span></h1>
+          <div id="impactPoint"></div>
+          <div id="ball"></div>
+          <div id="ring1" class="ring"></div>
+          <div id="ring2" class="ring"></div>
+          <div id="stampWrap"><div id="stamp"><span id="stampText">GOAT?</span></div></div>
+          <svg id="crown" width="130" height="92" viewBox="0 0 120 84">
+            <path d="M14 64 L26 24 L46 46 L60 12 L74 46 L94 24 L106 64 Z" fill="#ffc93c" stroke="#8a6a1c" stroke-width="2.5" stroke-linejoin="round"/>
+            <rect x="16" y="66" width="88" height="11" rx="3" fill="#ffc93c" stroke="#8a6a1c" stroke-width="2"/>
+            <circle cx="26" cy="22" r="5.5" fill="#ffe28f" stroke="#8a6a1c" stroke-width="2"/>
+            <circle cx="60" cy="10" r="5.5" fill="#ffe28f" stroke="#8a6a1c" stroke-width="2"/>
+            <circle cx="94" cy="22" r="5.5" fill="#ffe28f" stroke="#8a6a1c" stroke-width="2"/>
+          </svg>
+        </div>
+
+        <div id="tactics">
+          <svg id="passSvg" viewBox="0 0 1080 220">
+            <path id="passPath" d="M -50 174 C 210 214, 380 25, 640 66 C 830 95, 920 185, 1140 112"/>
+          </svg>
+          <div id="pathDot"></div>
+          <div class="chip" id="chip1"><b>8×</b><span>Zlatý míč</span></div>
+          <div class="chip" id="chip2"><b>850+</b><span>Gólů</span></div>
+          <div class="chip" id="chip3"><b>45+</b><span>Trofejí</span></div>
+        </div>
+
+        <div id="payBig"><em>5</em> DŮKAZŮ.</div>
+        <div id="paySub">45 sekund</div>
+        <div id="payRule"></div>
+      </div>
+
+      <!-- FLASH -->
+      <div id="flash" class="clip" data-start="0" data-duration="5.5" data-track-index="2"></div>
+
+      <!-- AUDIO -->
+      <audio id="sfx-crowd" data-start="0"    data-duration="5.5"  data-track-index="5" data-volume="0.055" src="assets/sfx/crowd.wav"></audio>
+      <audio id="sfx-riser" data-start="0.15" data-duration="0.45" data-track-index="6" data-volume="0.9"   src="assets/sfx/riser.wav"></audio>
+      <audio id="sfx-impact" data-start="0.52" data-duration="0.9"  data-track-index="8" data-volume="1"     src="assets/sfx/impact.wav"></audio>
+      <audio id="sfx-thud" data-start="1.6"  data-duration="0.3"  data-track-index="9" data-volume="0.85"  src="assets/sfx/thud.wav"></audio>
+      <audio id="sfx-tick1" data-start="2.45" data-duration="0.12" data-track-index="7" data-volume="0.6"   src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-tick2" data-start="2.7"  data-duration="0.12" data-track-index="7" data-volume="0.68"  src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-tick3" data-start="2.95" data-duration="0.12" data-track-index="7" data-volume="0.76"  src="assets/sfx/tick.wav"></audio>
+      <audio id="sfx-pop" data-start="3.82" data-duration="0.5"  data-track-index="10" data-volume="0.9"   src="assets/sfx/pop.wav"></audio>
+      <audio id="sfx-whip" data-start="4.95" data-duration="0.35" data-track-index="11" data-volume="0.85"  src="assets/sfx/whip.wav"></audio>
+      <audio id="sfx-hit2" data-start="5.28" data-duration="0.22" data-track-index="12" data-volume="0.5"   src="assets/sfx/impact.wav"></audio>
+    </div>
+
+    <script>
+      window.__timelines = window.__timelines || {};
+      const tl = gsap.timeline({ paused: true });
+      const IMPACT = { x: 540, y: 890 };
+
+      /* cold-seek baselines: vsechny vstupujici elementy startuji skryte */
+      ["#ball", "#stamp", "#crown", "#payRule", "#flash", "#ring1", "#ring2", "#passPath"].forEach((sel) => {
+        tl.set(sel, { opacity: 0 }, 0);
+      });
+
+      /* ---------- 0.00–0.30 · BG in + speedlines burst ---------- */
+      tl.fromTo("#bg", { opacity: 0 }, { opacity: 1, duration: 0.22, ease: "power1.out" }, 0);
+      tl.fromTo("#bgPitch", { opacity: 0 }, { opacity: 1, duration: 0.5 }, 0.1);
+      tl.fromTo(
+        "#speed1",
+        { opacity: 0, rotation: 26, scale: 2.6 },
+        { opacity: 0.75, rotation: 0, scale: 1, duration: 0.4, ease: "power2.out" }, 0.14
+      );
+      tl.fromTo(
+        "#speed2",
+        { opacity: 0, rotation: -18, scale: 2.2 },
+        { opacity: 0.4, rotation: 4, scale: 1.06, duration: 0.42, ease: "power2.out" }, 0.16
+      );
+      tl.to("#speed1", { opacity: 0, scale: 0.92, duration: 0.34, ease: "power1.in" }, 0.56);
+      tl.to("#speed2", { opacity: 0, scale: 0.96, duration: 0.3, ease: "power1.in" }, 0.6);
+
+      /* ---------- 0.15–0.52 · ball flight ---------- */
+      tl.fromTo("#ball",
+        { opacity: 1, x: -640, y: 660, scale: 1.75, rotation: -50 },
+        { x: 0, y: 0, scale: 1, rotation: 0, opacity: 1, duration: 0.4, ease: "power2.in" }, 0.13
+      );
+      tl.to("#ball", { opacity: 0, duration: 0.05 }, 0.52);
+
+      /* ---------- 0.52 · IMPACT ---------- */
+      tl.fromTo("#flash", { opacity: 0.95 }, { opacity: 0, duration: 0.2, ease: "power2.out" }, 0.52);
+      tl.fromTo("#ring1", { opacity: 0.95, scale: 0.25 }, { opacity: 0, scale: 3.9, duration: 0.55, ease: "power2.out" }, 0.52);
+      tl.fromTo("#ring2", { opacity: 0.8, scale: 0.2 }, { opacity: 0, scale: 5.4, duration: 0.7, ease: "power2.out" }, 0.53);
+      tl.to("#stage",
+        { keyframes: [{ x: -16, y: 9 }, { x: 12, y: -7 }, { x: -7, y: 4 }, { x: 4, y: -2 }, { x: 0, y: 0 }], duration: 0.5, ease: "none" }, 0.52
+      );
+      /* sparks — deterministic burst (angle deg, dist px, size px, delay) */
+      const sparks = [
+        [-152, 330, 12, 0.00], [-118, 452, 16, 0.02], [-84, 384, 10, 0.00], [-46, 512, 14, 0.03],
+        [-8, 420, 11, 0.01], [28, 548, 15, 0.02], [64, 396, 10, 0.00], [102, 470, 13, 0.03],
+        [138, 356, 11, 0.01], [172, 490, 14, 0.02], [206, 410, 10, 0.00], [242, 530, 13, 0.02]
+      ];
+      for (let i = 0; i < 12; i++) {
+        const d = document.createElement("div");
+        d.className = "spark";
+        d.style.background = ["#c6ff4a", "#ffffff", "#ffe28f"][i % 3];
+        d.id = "spk" + i;
+        document.getElementById("stage").appendChild(d);
+        const [ang, dist, size, delay] = sparks[i];
+        const rad = (ang * Math.PI) / 180;
+        const dx = Math.cos(rad) * dist;
+        const dy = Math.sin(rad) * dist * 0.72 - 60;
+        gsap.set(d, { width: size, height: size, x: -size / 2, y: -size / 2 });
+        tl.set(d, { opacity: 0 }, 0);
+        tl.fromTo(d,
+          { opacity: 1, x: dx * 0.08, y: dy * 0.08, scale: 0.4 },
+          { x: dx, y: dy, scale: 0.15, opacity: 0, duration: 0.5 + delay * 4, ease: "power2.out" }, 0.52 + delay
+        );
+      }
+
+      /* ---------- 0.56–1.15 · MESSI slam ---------- */
+      tl.fromTo("#messi .lt",
+        { opacity: 0, y: 250, scale: 1.55 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.5, ease: "back.out(1.5)", stagger: 0.048 }, 0.56
+      );
+      tl.fromTo("#messi",
+        { textShadow: "16px 0 0 rgba(255,61,90,0.85), -16px 0 0 rgba(64,255,170,0.85)" },
+        { textShadow: "0px 0 0 rgba(255,61,90,0), 0px 0 0 rgba(64,255,170,0)", duration: 0.6, ease: "power2.out" }, 0.58
+      );
+      tl.fromTo("#heroGlow", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.6);
+      tl.to("#heroGlow", { opacity: 0.55, duration: 0.5, yoyo: true, repeat: 3, ease: "sine.inOut" }, 1.25);
+
+      /* ---------- 0.78 · badge reveal ---------- */
+      tl.fromTo("#badge", { opacity: 0 }, { opacity: 1, duration: 0.12 }, 0.76);
+      tl.fromTo("#badgeClip",
+        { clipPath: "inset(0 100% 0 0)" },
+        { clipPath: "inset(0 0% 0 0)", duration: 0.38, ease: "power2.inOut" }, 0.78
+      );
+      tl.fromTo("#caret", { opacity: 1 }, { opacity: 0, duration: 0.14, yoyo: true, repeat: 5, ease: "none" }, 1.2);
+      tl.to("#caret", { opacity: 0, duration: 0.01 }, 2.05);
+
+      /* ---------- 1.32–1.75 · GOAT? stamp + crown ---------- */
+      tl.fromTo("#stamp",
+        { opacity: 1, scale: 2.7, rotation: -13 },
+        { scale: 1, rotation: 0, opacity: 1, duration: 0.3, ease: "power4.in" }, 1.32
+      );
+      tl.to("#stamp", { keyframes: [{ scale: 1.05 }, { scale: 0.98 }, { scale: 1 }], duration: 0.22, ease: "power1.out" }, 1.62);
+      tl.to("#stage",
+        { keyframes: [{ x: 9, y: -5 }, { x: -6, y: 3 }, { x: 3, y: -1 }, { x: 0, y: 0 }], duration: 0.3, ease: "none" }, 1.62
+      );
+      tl.fromTo("#stamp", { backgroundColor: "rgba(255,201,60,0.32)" }, { backgroundColor: "rgba(20,14,2,0.35)", duration: 0.4, immediateRender: false }, 1.62);
+      tl.fromTo("#crown",
+        { opacity: 1, y: -190, rotation: 9 },
+        { y: 0, rotation: 0, opacity: 1, duration: 0.46, ease: "bounce.out" }, 1.5
+      );
+
+      /* ---------- 1.9–2.3 · hold beat (čtení) ---------- */
+
+      /* ---------- 2.32 · hero slide-up, tactics in ---------- */
+      tl.to("#heroGroup", { y: -62, duration: 0.32, ease: "power3.out" }, 2.32);
+      tl.fromTo("#tactics", { opacity: 1 }, { opacity: 1, duration: 0.01 }, 2.3);
+
+      /* pass line draw 2.35→3.25 */
+      const path = document.getElementById("passPath");
+      const pathLen = path.getTotalLength();
+      tl.set("#passPath", { opacity: 1 }, 2.35);
+      tl.fromTo("#passPath",
+        { strokeDashoffset: pathLen },
+        { strokeDashoffset: 0, duration: 0.9, ease: "power1.inOut", immediateRender: false }, 2.35
+      );
+      const dotProxy = { p: 0 };
+      tl.to(dotProxy, {
+        p: 1,
+        duration: 0.9,
+        ease: "power1.inOut",
+        onUpdate: () => {
+          const pt = path.getPointAtLength(dotProxy.p * pathLen);
+          gsap.set("#pathDot", { x: pt.x, y: 1330 + pt.y, opacity: 1 });
+        },
+      }, 2.35);
+      tl.to("#pathDot", { opacity: 0, duration: 0.12 }, 3.3);
+
+      /* chips pop */
+      tl.fromTo("#chip1", { opacity: 0, scale: 0.35, y: 26 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(2.1)" }, 2.45);
+      tl.fromTo("#chip2", { opacity: 0, scale: 0.35, y: 26 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(2.1)" }, 2.7);
+      tl.fromTo("#chip3", { opacity: 0, scale: 0.35, y: 26 }, { opacity: 1, scale: 1, y: 0, duration: 0.34, ease: "back.out(2.1)" }, 2.95);
+
+      /* ---------- 3.55 · exit wipe ---------- */
+      tl.to("#heroGroup", { x: -1320, duration: 0.3, ease: "power3.in" }, 3.55);
+      tl.to("#tactics", { opacity: 0, scale: 0.94, transformOrigin: "50% 80%", duration: 0.24, ease: "power2.in" }, 3.55);
+      tl.to("#badge", { opacity: 0, duration: 0.2, ease: "power1.in" }, 3.55);
+
+      /* ---------- 3.82 · payoff ---------- */
+      tl.fromTo("#payBig",
+        { opacity: 0, scale: 1.9 },
+        { opacity: 1, scale: 1, duration: 0.3, ease: "power4.out" }, 3.82
+      );
+      tl.fromTo("#payBig", { textShadow: "10px 0 0 rgba(255,61,90,0.7), -10px 0 0 rgba(64,255,170,0.7)" },
+        { textShadow: "0px 0 0 rgba(255,61,90,0), 0px 0 0 rgba(64,255,170,0)", duration: 0.45, immediateRender: false }, 3.84);
+      tl.fromTo("#paySub", { opacity: 0, y: 44 }, { opacity: 1, y: 0, duration: 0.3, ease: "power2.out" }, 4.08);
+      tl.fromTo("#payRule", { opacity: 1, width: 0 }, { width: 560, opacity: 1, duration: 0.4, ease: "power3.inOut" }, 4.12);
+      tl.to("#payRule", { opacity: 0, duration: 0.15 }, 4.72);
+
+      /* ---------- 4.95 · whip out ---------- */
+      tl.to("#stage",
+        { scale: 1.16, x: 90, filter: "blur(14px)", opacity: 0, duration: 0.34, ease: "power2.in", transformOrigin: "50% 50%" }, 4.95
+      );
+      tl.to("#bg", { opacity: 0, duration: 0.3, ease: "power1.in" }, 5.16);
+      tl.fromTo("#flash", { opacity: 0.85 }, { opacity: 0, duration: 0.1, ease: "power1.out", immediateRender: false }, 5.28);
+
+      /* lock composition length: 5.5 s */
+      tl.set({}, {}, 5.5);
+
+      window.__timelines["goat-start-v1"] = tl;
+      tl.seek(0);
+    </script>
+  </body>
+</html>
